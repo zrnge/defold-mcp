@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { defoldStop, defoldListProcesses } from '../../src/tools/run.js';
+import { defoldStop, defoldListProcesses, defoldGetProcessOutput } from '../../src/tools/run.js';
 
 const config = { projectRoot: process.cwd(), logLevel: 'error' as const };
 
@@ -14,5 +14,11 @@ describe('process tools', () => {
     const result = defoldListProcesses(config);
     expect(result.success).toBe(true);
     expect(Array.isArray(result.data?.processes)).toBe(true);
+  });
+
+  it('refuses output for a process not started by this MCP', () => {
+    const result = defoldGetProcessOutput(config, { processId: 99999 });
+    expect(result.success).toBe(false);
+    expect(result.error?.code).toBe('PROCESS_NOT_FOUND');
   });
 });

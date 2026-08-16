@@ -133,6 +133,7 @@ Use an MCP extension and configure a stdio server with the command above.
 - `defold_run`
 - `defold_stop`
 - `defold_list_processes`
+- `defold_get_process_output` — read captured stdout/stderr from a running/finished process
 
 ## Development
 
@@ -168,6 +169,21 @@ The test suite includes:
 - Lua analysis is lightweight regex-based; it is not a full AST parser.
 - Some advanced Defold features (e.g., complex component properties) may require manual editing.
 
+## Debug loop: build → run → inspect
+
+To know whether a change actually works, the AI should follow this loop instead of guessing:
+
+1. `defold_build` — build the project.
+2. `defold_get_build_errors` — extract errors, warnings, and file/line info.
+3. `defold_read_file` — inspect the offending files.
+4. `defold_apply_patch` — make a focused fix.
+5. `defold_validate` — validate Lua syntax and resource references.
+6. `defold_run` — launch the game.
+7. `defold_get_process_output` — read captured runtime stdout/stderr.
+8. Repeat from step 1 until the build succeeds and the game runs cleanly.
+
+`defold_get_process_output` is the key to confirming the game works: it returns everything the running Defold process prints, including Lua runtime errors, warnings, and `print()`/`pprint()` output.
+
 ## Final acceptance test
 
 The repository includes an automated acceptance path that exercises the core AI workflow:
@@ -188,8 +204,6 @@ This runs the full suite against `tests/fixtures/sample-project`, which performs
 8. Parses build results with `defold_get_build_errors`.
 9. Reports changed files and diagnostics.
 
-Integration tests are skipped cleanly when Defold is not installed, so the suite always passes.
-
 ## Recommended next features
 
 - Full game object/component modification tools
@@ -197,6 +211,11 @@ Integration tests are skipped cleanly when Defold is not installed, so the suite
 - Deeper message flow analysis (`defold_find_messages`)
 - Project indexing and caching for large projects
 - HTTP/SSE transport support
+
+## Author
+
+- GitHub: [zrnge/defold-mcp](https://github.com/zrnge/defold-mcp)
+- Website: [zrnge.github.io](https://zrnge.github.io)
 
 ## License
 

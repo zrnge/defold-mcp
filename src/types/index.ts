@@ -123,4 +123,5 @@ export interface RunningProcess {
   processId: number;
   command: string;
   startTime: Date;
+  output?: string;
 }

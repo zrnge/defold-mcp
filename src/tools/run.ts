@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { getProjectInfo } from '../utils/project.js';
-import { runGame, stopProcess, listRunningProcesses } from '../defold/process.js';
+import { runGame, stopProcess, listRunningProcesses, getProcessOutput } from '../defold/process.js';
 import type { ProjectConfig, McpResult, RunningProcess } from '../types/index.js';
 import { createError, ErrorCodes, defoldNotFoundError } from '../utils/errors.js';
 
@@ -13,6 +13,10 @@ export const StopSchema = z.object({
 });
 
 export const ListProcessesSchema = z.object({});
+
+export const GetProcessOutputSchema = z.object({
+  processId: z.number().int(),
+});
 
 export async function defoldRun(
   config: ProjectConfig,
@@ -42,6 +46,24 @@ export function defoldStop(
     };
   }
   return { success: true, data: result, summary: `Stopped process ${args.processId}.` };
+}
+
+export function defoldGetProcessOutput(
+  _config: ProjectConfig,
+  args: z.infer<typeof GetProcessOutputSchema>,
+): McpResult<{ processId: number; output: string }> {
+  const result = getProcessOutput(args.processId);
+  if (!result) {
+    return {
+      success: false,
+      error: createError(
+        ErrorCodes.PROCESS_NOT_FOUND,
+        `Process ${args.processId} was not started by this MCP.`,
+        'Only processes launched via defold_run can be inspected.',
+      ),
+    };
+  }
+  return { success: true, data: result, summary: `Retrieved output for process ${args.processId}.` };
 }
 
 export function defoldListProcesses(

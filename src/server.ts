@@ -51,7 +51,16 @@ import {
 } from './tools/collections.js';
 import { CreateGuiSchema, CreateGuiNodeSchema, defoldCreateGui, defoldCreateGuiNode } from './tools/gui.js';
 import { GetInputBindingsSchema, AddInputBindingSchema, defoldGetInputBindings, defoldAddInputBinding } from './tools/input.js';
-import { RunSchema, StopSchema, ListProcessesSchema, defoldRun, defoldStop, defoldListProcesses } from './tools/run.js';
+import {
+  RunSchema,
+  StopSchema,
+  ListProcessesSchema,
+  GetProcessOutputSchema,
+  defoldRun,
+  defoldStop,
+  defoldGetProcessOutput,
+  defoldListProcesses,
+} from './tools/run.js';
 import { GitStatusSchema, defoldGitStatus } from './tools/git.js';
 
 export async function startServer(config: ProjectConfig): Promise<void> {
@@ -196,6 +205,11 @@ export async function startServer(config: ProjectConfig): Promise<void> {
           inputSchema: zodToJsonSchema(ListProcessesSchema),
         },
         {
+          name: 'defold_get_process_output',
+          description: 'Get captured stdout/stderr of a running or recently finished process started by defold_run.',
+          inputSchema: zodToJsonSchema(GetProcessOutputSchema),
+        },
+        {
           name: 'defold_git_status',
           description: 'Read-only Git status for the project.',
           inputSchema: zodToJsonSchema(GitStatusSchema),
@@ -288,6 +302,9 @@ export async function startServer(config: ProjectConfig): Promise<void> {
           break;
         case 'defold_list_processes':
           result = defoldListProcesses(config);
+          break;
+        case 'defold_get_process_output':
+          result = defoldGetProcessOutput(config, GetProcessOutputSchema.parse(args));
           break;
         case 'defold_git_status':
           result = await defoldGitStatus(config);
@@ -407,7 +424,16 @@ function zodToJsonSchema(schema: { _def?: { shape?: () => Record<string, unknown
 function getPromptText(name: string): string {
   switch (name) {
     case 'defold_debug_game':
-      return 'Use defold_project_context to understand the project, then defold_build and defold_get_build_errors to find issues. Read relevant files with defold_read_file and apply focused patches with defold_apply_patch.';
+      return `Follow this loop until the game works:
+1. defold_project_context — understand the project.
+2. defold_build — build the project.
+3. defold_get_build_errors — parse build output for errors/warnings.
+4. defold_read_file — read the offending files.
+5. defold_apply_patch — fix the issue with a small, focused change.
+6. defold_validate — validate Lua syntax and resource references.
+7. defold_run — launch the game.
+8. defold_get_process_output — read runtime stdout/stderr for crashes or logic errors.
+9. Repeat from step 2 until the build succeeds and the game runs cleanly.`;
     case 'defold_create_feature':
       return 'Start with defold_project_context. Identify the relevant scripts, collections, and input bindings. Use defold_apply_patch for small Lua changes and defold_validate after edits.';
     case 'defold_review_project':
