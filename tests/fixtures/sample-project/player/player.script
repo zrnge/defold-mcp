@@ -1,0 +1,25 @@
+local speed = 100
+
+function init(self)
+    msg.post(".", "acquire_input_focus")
+end
+
+function update(self, dt)
+    local pos = go.get_position()
+    pos.x = pos.x + speed * dt
+    go.set_position(pos)
+end
+
+function on_input(self, action_id, action)
+    if action_id == hash("move_left") then
+        speed = -100
+    elseif action_id == hash("move_right") then
+        speed = 100
+    end
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("player_died") then
+        msg.post("main:/controller#script", "game_over")
+    end
+end

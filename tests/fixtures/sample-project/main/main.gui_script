@@ -1,0 +1,16 @@
+local score = 0
+
+function init(self)
+    msg.post(".", "acquire_input_focus")
+end
+
+function update(self, dt)
+    local node = gui.get_node("score")
+    gui.set_text(node, "Score: " .. tostring(score))
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("score_changed") then
+        score = message.score
+    end
+end

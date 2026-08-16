@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-eslint/
+*.log
+.env
+.DS_Store
+*.tsbuildinfo
+coverage/
+.defold-mcp-backups/

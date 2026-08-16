@@ -1,0 +1,27 @@
+script: "/main/main.gui_script"
+background_color {
+  x: 0.0
+  y: 0.0
+  z: 0.0
+  w: 0.0
+}
+nodes {
+  id: "score"
+  type: TYPE_TEXT
+  position {
+    x: 50.0
+    y: 700.0
+    z: 0.0
+  }
+  size {
+    x: 200.0
+    y: 50.0
+    z: 0.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+}
